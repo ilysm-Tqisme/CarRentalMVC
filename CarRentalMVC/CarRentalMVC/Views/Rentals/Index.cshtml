@@ -1,0 +1,50 @@
+﻿@model IEnumerable<CarRentalMVC.Models.RentalViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý thuê xe";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-3">Danh sách đơn thuê xe</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <p>Không có đơn thuê nào.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Xe</th>
+                <th>Chi nhánh</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="@r.VehicleImage" width="80" class="rounded me-2" />
+                        <b>@r.VehicleName</b>
+                    </td>
+                    <td>@r.BranchName</td>
+                    <td>@r.RentalDate.ToString("dd/MM/yyyy")</td>
+                    <td>@r.ReturnDate.ToString("dd/MM/yyyy")</td>
+                    <td>@r.TotalPrice.ToString("N0") VNĐ</td>
+                    <td>@r.Status</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@r.VehicleID" class="btn btn-info btn-sm">Xem</a>
+                        <a asp-action="Cancel" asp-route-id="@r.VehicleID" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bạn có chắc muốn hủy đơn thuê này không?')">Hủy</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

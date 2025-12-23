@@ -1,0 +1,91 @@
+﻿@model CarRentalMVC.Models.VehicleViewModel
+
+@{
+    ViewData["Title"] = "Xem chi tiết xe";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow-sm border-0 p-3">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@($"http://localhost:5000{Model.VehicleImage}")"
+                 alt="Ảnh xe"
+                 class="img-fluid rounded"
+                 onerror="this.src='/images/no-image.png'" />
+        </div>
+
+        <div class="col-md-6">
+            <h3>@Model.VehicleName</h3>
+            <p><strong>Hãng xe:</strong> @Model.BrandName</p>
+            <p><strong>Loại xe:</strong> @Model.TypeName</p>
+            <p><strong>Chi nhánh:</strong> @Model.BranchName</p>
+
+            <p><strong>Số ghế:</strong> @Model.Seats</p>
+            <p><strong>Giá thuê:</strong> @Model.PricePerDay.ToString("N0") VNĐ/ngày</p>
+            
+            @* Hiển thị trạng thái xe dựa trên Status *@
+            <p><strong>Trạng thái:</strong>
+                @{
+                    var statusText = "Sẵn Sàng";
+                    var statusClass = "badge bg-success";
+                    
+                    if (Model.Status == "Reserved" || Model.Status == "Rented")
+                    {
+                        statusText = "Đã Đặt Xe";
+                        statusClass = "badge bg-warning";
+                    }
+                    else if (Model.Status == "Maintenance")
+                    {
+                        statusText = "Bảo Trì";
+                        statusClass = "badge bg-secondary";
+                    }
+                    else if (!Model.IsActive)
+                    {
+                        statusText = "Không Khả Dụng";
+                        statusClass = "badge bg-danger";
+                    }
+                }
+                <span class="@statusClass">@statusText</span>
+            </p>
+            
+            <p><strong>Mô tả:</strong></p>
+            <p>@Model.Description</p>
+
+            <a asp-action="Index" class="btn btn-secondary mt-2">← Quay lại</a>
+
+            @* Chỉ cho phép đặt xe nếu xe sẵn sàng (Available) và IsActive = true *@
+            @if (Model.Status == "Available" && Model.IsActive)
+            {
+                <a asp-controller="Rentals"
+                   asp-action="Create"
+                   asp-route-id="@Model.VehicleID"
+                   class="btn btn-primary mt-2">
+                    <i class="bi bi-calendar-check me-2"></i>Đặt Xe Ngay
+                </a>
+            }
+            else
+            {
+                <button class="btn btn-secondary mt-2" disabled>
+                    <i class="bi bi-lock-fill me-2"></i>Không Thể Đặt
+                </button>
+                <div class="alert alert-warning mt-2">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @if (Model.Status == "Reserved" || Model.Status == "Rented")
+                    {
+                        <text>Xe này đã được đặt. Vui lòng chọn xe khác.</text>
+                    }
+                    else if (Model.Status == "Maintenance")
+                    {
+                        <text>Xe này đang được bảo trì. Vui lòng chọn xe khác.</text>
+                    }
+                    else
+                    {
+                        <text>Xe này hiện không khả dụng. Vui lòng chọn xe khác.</text>
+                    }
+                </div>
+            }
+
+
+        </div>
+    </div>
+</div>

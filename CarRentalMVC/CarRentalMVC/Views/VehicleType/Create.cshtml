@@ -1,0 +1,27 @@
+﻿@model CarRentalMVC.Models.VehicleViewModel
+@{
+    ViewData["Title"] = "Thêm xe mới";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="TypeName" class="form-label"></label>
+        <input asp-for="TypeName" class="form-control" placeholder="Nhập tên loại xe..." />
+        <span asp-validation-for="TypeName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" placeholder="Nhập mô tả..."></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">💾 Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">↩ Quay lại</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

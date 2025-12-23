@@ -1,0 +1,36 @@
+﻿@model IEnumerable<CarRentalMVC.Models.VehicleTypeViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý Loại xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="mb-3">Quản lý Loại xe</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Create">➕ Thêm Loại xe</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Mã</th>
+            <th>Tên loại xe</th>
+            <th>Mô tả</th>
+            <th class="text-center">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TypeID</td>
+                <td>@item.TypeName</td>
+                <td>@item.Description</td>
+                <td class="text-center">
+                    <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.TypeID">✏️ Sửa</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.TypeID"
+                       onclick="return confirm('Bạn có chắc muốn xóa loại xe này không?');">🗑️ Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,23 @@
+﻿@model CarRentalMVC.Models.VehicleViewModel
+
+@{
+    ViewData["Title"] = "Xóa xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Bạn có chắc muốn xóa xe này?</h2>
+
+<div>
+    <p><strong>Tên xe:</strong> @Model.VehicleName</p>
+    <p><strong>Giá thuê / ngày:</strong> @Model.PricePerDay.ToString("N0") đ</p>
+    @if (!string.IsNullOrEmpty(Model.VehicleImage))
+    {
+        <img src="@Model.VehicleImage" width="150" />
+    }
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="VehicleID" />
+    <button type="submit" class="btn btn-danger mt-3">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Hủy</a>
+</form>

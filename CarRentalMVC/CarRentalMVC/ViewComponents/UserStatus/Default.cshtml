@@ -1,0 +1,20 @@
+@model bool
+
+@* ViewComponent hiển thị trạng thái người dùng (Khóa/Mở) *@
+@{
+    var isLocked = ViewBag.IsLocked as bool? ?? Model;
+}
+
+@if (isLocked)
+{
+    <span class="badge bg-danger">
+        <i class="bi bi-lock-fill me-1"></i>Đã Khóa
+    </span>
+}
+else
+{
+    <span class="badge bg-success">
+        <i class="bi bi-unlock-fill me-1"></i>Hoạt Động
+    </span>
+}
+

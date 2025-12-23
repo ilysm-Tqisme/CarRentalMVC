@@ -1,0 +1,89 @@
+﻿@model IEnumerable<CarRentalMVC.Models.VehicleViewModel>
+
+<div class="row g-4">
+    @foreach (var v in Model)
+    {
+        @* Kiểm tra xe có sẵn sàng để đặt không *@
+        var isUnavailableForBooking = !v.IsActive || (v.Status != "Available");
+        <div class="col-lg-4 col-md-6 vehicle-card-wrapper">
+            <div class="vehicle-card @(isUnavailableForBooking ? "vehicle-disabled" : "")">
+                                                 <div class="vehicle-image-wrapper">
+                                                     <img src="@($"http://localhost:5000{v.VehicleImage}")"
+                                                          class="vehicle-image"
+                                                          alt="@v.VehicleName"
+                                                          onerror="this.src='/images/no-image.png'" />
+
+                    <div class="vehicle-overlay">
+                        @* Luôn cho phép xem chi tiết, nhưng không cho phép đặt nếu xe đã được đặt *@
+                        <a asp-action="Details" asp-route-id="@v.VehicleID" class="btn btn-view-details">
+                            <i class="bi bi-eye me-2"></i>Xem Chi Tiết
+                        </a>
+                    </div>
+
+                    @* Hiển thị trạng thái xe dựa trên Status *@
+                    @{
+                        var statusText = "Sẵn Sàng";
+                        var statusClass = "badge-available";
+                        var statusIcon = "bi-check-circle-fill";
+                        //var isUnavailableForBooking = false;
+                        
+                        // Kiểm tra trạng thái xe
+                        if (v.Status == "Reserved" || v.Status == "Rented")
+                        {
+                            statusText = "Đã Đặt Xe";
+                            statusClass = "badge-unavailable";
+                            statusIcon = "bi-calendar-x-fill";
+                            isUnavailableForBooking = true;
+                        }
+                        else if (v.Status == "Maintenance")
+                        {
+                            statusText = "Bảo Trì";
+                            statusClass = "badge-maintenance";
+                            statusIcon = "bi-tools";
+                            isUnavailableForBooking = true;
+                        }
+                        else if (!v.IsActive || v.Status != "Available")
+                        {
+                            statusText = "Không Khả Dụng";
+                            statusClass = "badge-unavailable";
+                            statusIcon = "bi-x-circle-fill";
+                            isUnavailableForBooking = true;
+                        }
+                    }
+                    
+                    <span class="vehicle-badge @statusClass">
+                        <i class="@statusIcon me-1"></i>@statusText
+                    </span>
+                </div>
+
+                <div class="vehicle-body">
+                    <h5 class="vehicle-title">@v.VehicleName</h5>
+                    <div class="vehicle-info">
+                        <div class="info-item">
+                            <i class="bi bi-cash-stack"></i>
+                            <span>@v.PricePerDay.ToString("N0") VNĐ/ngày</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="bi bi-people-fill"></i>
+                            <span>@v.Seats chỗ ngồi</span>
+                        </div>
+                    </div>
+
+                    @* Chỉ cho phép đặt xe nếu xe sẵn sàng (Available) và IsActive = true *@
+                    @if (!isUnavailableForBooking && v.Status == "Available" && v.IsActive)
+                    {
+                        <a asp-action="Details" asp-route-id="@v.VehicleID" class="btn btn-book-now">
+                            <i class="bi bi-calendar-check me-2"></i>Đặt Xe Ngay
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="bi bi-lock-fill me-1"></i>Không Thể Đặt
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

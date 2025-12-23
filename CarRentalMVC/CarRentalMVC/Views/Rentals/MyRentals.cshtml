@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Đơn thuê xe của bạn<";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model List<CarRentalMVC.Models.RentalViewModel>
+
+@{
+    ViewData["Title"] = "Lịch sử thuê xe";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Danh sách đơn thuê của tôi</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info">
+            Bạn chưa có đơn thuê nào. <a href="@Url.Action("Index", "Home")">Đặt xe ngay</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Xe</th>
+                        <th>Ngày thuê</th>
+                        <th>Ngày trả</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Tạo lúc</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rental in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@($"{ViewBag.ApiBase}{rental.VehicleImage}")"
+                                         alt="@rental.VehicleName"
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                                         onerror="this.src='/images/no-image.png'" />
+                                    <div>
+                                        <strong>@rental.VehicleName</strong><br />
+                                        <small class="text-muted">@rental.BrandName - @rental.TypeName</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@rental.RentalDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@rental.ReturnDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="fw-bold">@rental.TotalPrice.ToString("N0") VNĐ</td>
+                            <td>
+                                @if (rental.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                }
+                                else if (rental.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                }
+                                else if (rental.Status == "Active")
+                                {
+                                    <span class="badge bg-info">Đang thuê</span>
+                                }
+                                else if (rental.Status == "Completed")
+                                {
+                                    <span class="badge bg-secondary">Hoàn thành</span>
+                                }
+                                else if (rental.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                }
+                                else if (rental.Status == "Rejected")
+                                {
+                                    <span class="badge bg-dark">Bị từ chối</span>
+                                }
+                            </td>
+                            <td>@rental.CreatedDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <a href="@Url.Action("Details", new { id = rental.RentalID })"
+                                   class="btn btn-sm btn-info">Xem</a>
+                                @if (rental.Status == "Pending")
+                                {
+                                    <form method="post" action="@Url.Action("Cancel", new { id = rental.RentalID })"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn hủy đơn này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Hủy</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

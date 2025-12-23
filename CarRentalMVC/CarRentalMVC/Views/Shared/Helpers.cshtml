@@ -1,0 +1,12 @@
+﻿@functions {
+    public static string GetFullImageUrl(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return "/images/no-avatar.png";
+
+        if (path.StartsWith("http"))
+            return path;
+
+        return $"http://localhost:5000{path}";
+    }
+}

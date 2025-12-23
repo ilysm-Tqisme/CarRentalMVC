@@ -1,0 +1,49 @@
+﻿@model IEnumerable<CarRentalMVC.Models.VehicleViewModel>
+@{
+    ViewData["Title"] = "Danh sách xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<a asp-action="Create" class="btn btn-primary mb-3">➕ Thêm xe mới</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Ảnh</th>
+            <th>Tên xe</th>
+            <th>Giá thuê/ngày</th>
+            <th>Số chỗ</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(v.VehicleImage))
+                    {
+                        <img src="@($"http://localhost:5000{v.VehicleImage}")"
+                             style="width:100px;height:70px;object-fit:cover;border-radius:8px;" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có ảnh</span>
+                    }
+                </td>
+
+                <td>@v.VehicleName</td>
+                <td>@v.PricePerDay.ToString("N0") đ</td>
+                <td>@v.Seats</td>
+                <td>@v.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@v.VehicleID" class="btn btn-info btn-sm">Xem</a>
+                    <a asp-action="Edit" asp-route-id="@v.VehicleID" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@v.VehicleID" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Xóa xe này?');">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

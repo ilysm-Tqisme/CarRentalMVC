@@ -1,0 +1,57 @@
+﻿@model CarRentalMVC.Models.BranchCreateModel
+@{
+    ViewBag.Title = "Thêm chi nhánh";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Thêm chi nhánh</h2>
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label>Tên chi nhánh</label>
+        <input asp-for="BranchName" class="form-control" />
+        <span asp-validation-for="BranchName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Địa chỉ (Tỉnh / Thành phố)</label>
+        <select asp-for="Address" class="form-select">
+            <option value="">-- Chọn tỉnh/thành phố --</option>
+            @foreach (var province in ViewBag.Provinces)
+            {
+                <option value="@province">@province</option>
+            }
+        </select>
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Số điện thoại</label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Mô tả</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Ảnh chi nhánh</label>
+        <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" onchange="previewImage(event)" />
+        <img id="preview" src="#" style="display:none;margin-top:10px;width:200px;border-radius:8px;" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(event) {
+            const output = document.getElementById('preview');
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.style.display = 'block';
+        }
+    </script>
+}

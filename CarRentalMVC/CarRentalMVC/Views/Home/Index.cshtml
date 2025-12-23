@@ -1,0 +1,237 @@
+﻿@model IEnumerable<CarRentalMVC.Models.VehicleViewModel>
+
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title animate-fade-in">Thuê Xe Chất Lượng Cao</h1>
+        <p class="hero-subtitle animate-fade-in-delay">Trải nghiệm dịch vụ thuê xe hàng đầu với giá cả hợp lý</p>
+        <a href="#vehicles" class="btn btn-hero animate-fade-in-delay-2">
+            <i class="bi bi-car-front-fill me-2"></i>Khám Phá Ngay
+        </a>
+    </div>
+    <div class="hero-scroll-indicator">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+<section class="search-section py-5">
+    <div class="text-center mb-4 search-wrapper">
+        <input type="text" id="searchInput"
+               class="form-control form-control-lg search-box"
+               placeholder="🔍 Tìm kiếm theo tên, hãng, hoặc loại xe..." />
+    </div>
+</section>
+
+
+<section id="vehicles" class="vehicles-section py-5">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">Xe Cho Thuê</h2>
+            <div class="section-divider"></div>
+            <p class="section-subtitle">Chọn chiếc xe phù hợp với nhu cầu của bạn</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var v in Model)
+            {
+                <div class="col-lg-4 col-md-6 vehicle-card-wrapper">
+                    <div class="vehicle-card">
+                        <div class="vehicle-image-wrapper">
+                            <img src="@($"http://localhost:5000{v.VehicleImage}")"
+                                 class="vehicle-image"
+                                 alt="@v.VehicleName"
+                                 onerror="this.src='/images/no-image.png'" />
+                            <div class="vehicle-overlay">
+                                <a asp-action="Details" asp-route-id="@v.VehicleID" class="btn btn-view-details">
+                                    <i class="bi bi-eye me-2"></i>Xem Chi Tiết
+                                </a>
+                            </div>
+                            @* Hiển thị trạng thái xe dựa trên Status *@
+                            @{
+                                var statusText = "Sẵn Sàng";
+                                var statusClass = "badge-available";
+                                var statusIcon = "bi-check-circle-fill";
+                                
+                                // Kiểm tra trạng thái xe
+                                if (v.Status == "Reserved" || v.Status == "Rented")
+                                {
+                                    statusText = "Đã Đặt Xe";
+                                    statusClass = "badge-unavailable";
+                                    statusIcon = "bi-calendar-x-fill";
+                                }
+                                else if (v.Status == "Maintenance")
+                                {
+                                    statusText = "Bảo Trì";
+                                    statusClass = "badge-maintenance";
+                                    statusIcon = "bi-tools";
+                                }
+                                else if (!v.IsActive)
+                                {
+                                    statusText = "Không Khả Dụng";
+                                    statusClass = "badge-unavailable";
+                                    statusIcon = "bi-x-circle-fill";
+                                }
+                            }
+                            
+                            <span class="vehicle-badge @statusClass">
+                                <i class="@statusIcon me-1"></i>@statusText
+                            </span>
+                        </div>
+                        <div class="vehicle-body">
+                            <h5 class="vehicle-title">@v.VehicleName</h5>
+                            <div class="vehicle-info">
+                                <div class="info-item">
+                                    <i class="bi bi-cash-stack"></i>
+                                    <span>@v.PricePerDay.ToString("N0") VNĐ/ngày</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>@v.Seats chỗ ngồi</span>
+                                </div>
+                            </div>
+                            @* Chỉ cho phép đặt xe nếu xe sẵn sàng (Available) và IsActive = true *@
+                            @if (v.Status == "Available" && v.IsActive)
+                            {
+                                <a asp-action="Details" asp-route-id="@v.VehicleID" class="btn btn-book-now">
+                                    <i class="bi bi-calendar-check me-2"></i>Đặt Xe Ngay
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="bi bi-lock-fill me-2"></i>Không Thể Đặt
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+  
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav class="pagination-wrapper mt-5">
+                <ul class="pagination-custom">
+                    @if (ViewBag.Page > 1)
+                    {
+                        <li class="pagination-item">
+                            <a class="pagination-link" asp-action="Index" asp-route-page="@(ViewBag.Page - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+                    {
+                        <li class="pagination-item">
+                            <a class="pagination-link @(i == ViewBag.Page ? "active" : "")"
+                               asp-action="Index"
+                               asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.Page < ViewBag.TotalPages)
+                    {
+                        <li class="pagination-item">
+                            <a class="pagination-link" asp-action="Index" asp-route-page="@(ViewBag.Page + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+</section>
+
+
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4 class="feature-title">An Toàn</h4>
+                    <p class="feature-text">Xe được bảo dưỡng định kỳ, đảm bảo an toàn tuyệt đối</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <h4 class="feature-title">Giá Tốt</h4>
+                    <p class="feature-text">Giá cả cạnh tranh, nhiều ưu đãi hấp dẫn</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h4 class="feature-title">Hỗ Trợ 24/7</h4>
+                    <p class="feature-text">Đội ngũ hỗ trợ nhiệt tình, sẵn sàng phục vụ mọi lúc</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/home.css" />
+    <script src="~/js/home.js"></script>
+    <style>
+        /* ✅ CSS thanh tìm kiếm */
+        .search-section {
+            background: #f8f9fa;
+        }
+
+        .search-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box {
+            border-radius: 50px;
+            padding: 14px 25px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+            .search-box:focus {
+                border-color: #007bff;
+                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+                outline: none;
+            }
+    </style>
+    <script>
+        // ✅ Lọc xe trực tiếp tại chỗ
+        const searchInput = document.getElementById("searchInput");
+        const vehicleCards = document.querySelectorAll("#vehicleList .vehicle-card-wrapper");
+
+        searchInput.addEventListener("keyup", function () {
+            const keyword = this.value.toLowerCase().trim();
+
+            vehicleCards.forEach(card => {
+                const name = card.getAttribute("data-name").toLowerCase();
+                if (name.includes(keyword)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    </script>
+}
+

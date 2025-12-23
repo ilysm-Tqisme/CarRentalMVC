@@ -1,0 +1,130 @@
+﻿@model CarRentalMVC.Models.CreateRentalViewModel
+@{
+    ViewData["Title"] = "Đặt xe";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Thông tin xe -->
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <img src="@($"{ViewBag.ApiBase}{Model.VehicleImage}")"
+                     alt="Ảnh xe"
+                     class="card-img-top"
+                     style="height: 300px; object-fit: cover;"
+                     onerror="this.src='/images/no-image.png'" />
+
+                <div class="card-body">
+                    <h4 class="card-title">@Model.VehicleName</h4>
+                    <p class="text-muted mb-1">
+                        <strong>Hãng:</strong> @Model.BrandName
+                    </p>
+                    <p class="text-muted mb-1">
+                        <strong>Loại:</strong> @Model.TypeName
+                    </p>
+                    <p class="text-muted mb-1">
+                        <strong>Số ghế:</strong> @Model.Seats
+                    </p>
+                    <h5 class="text-primary mt-3">
+                        @Model.DailyRate.ToString("N0") VNĐ<span class="text-muted" style="font-size: 0.8em;">/ngày</span>
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form đặt xe -->
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Đặt xe thuê</h3>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.Error))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" id="rentalForm">
+                        <input type="hidden" name="VehicleID" value="@Model.VehicleID" />
+
+                        <!-- Chọn chi nhánh -->
+                        <div class="mb-3">
+                            <label for="BranchID" class="form-label">Chi nhánh nhận xe</label>
+                            <select class="form-control @(ViewData.ModelState.ContainsKey("BranchID") ? "is-invalid" : "")"
+                                <option value="">-- Chọn chi nhánh --</option>
+                                @foreach (var branch in ViewBag.Branches)
+                                {
+                                    <option value="@branch.BranchID">@branch.BranchName - @branch.Address</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Ngày thuê -->
+                        <div class="mb-3">
+                            <label for="RentalDate" class="form-label">Ngày nhận xe</label>
+                            <input type="datetime-local" class="form-control" id="RentalDate" name="RentalDate"
+                                   value="@Model.RentalDate.ToString("yyyy-MM-ddTHH:mm")" required
+                                   onchange="calculatePrice()" />
+                        </div>
+
+                        <!-- Ngày trả -->
+                        <div class="mb-3">
+                            <label for="ReturnDate" class="form-label">Ngày trả xe</label>
+                            <input type="datetime-local" class="form-control" id="ReturnDate" name="ReturnDate"
+                                   value="@Model.ReturnDate.ToString("yyyy-MM-ddTHH:mm")" required
+                                   onchange="calculatePrice()" />
+                        </div>
+
+                        <!-- Số ngày & Giá tiền -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số ngày thuê</label>
+                                <input type="text" class="form-control" id="totalDays" disabled />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tổng tiền</label>
+                                <input type="text" class="form-control fw-bold text-success" id="totalPrice" disabled />
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="TotalPrice" name="TotalPrice" />
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Đặt xe</button>
+                            <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Quay lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculatePrice() {
+        const rentalDate = document.getElementById('RentalDate').value;
+        const returnDate = document.getElementById('ReturnDate').value;
+        const vehicleId = @Model.VehicleID;
+        const dailyRate = @Model.DailyRate;
+
+        if (!rentalDate || !returnDate) return;
+
+        const start = new Date(rentalDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+        const totalPrice = diffDays * dailyRate;
+
+        document.getElementById('totalDays').value = diffDays + ' ngày';
+        document.getElementById('totalPrice').value = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(totalPrice);
+        document.getElementById('TotalPrice').value = totalPrice;
+    }
+
+    // Tính giá lần đầu
+    calculatePrice();
+</script>

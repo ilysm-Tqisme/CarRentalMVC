@@ -1,0 +1,199 @@
+﻿@model CarRentalMVC.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-container">
+    <div class="auth-background">
+        <div class="auth-shape shape-1"></div>
+        <div class="auth-shape shape-2"></div>
+        <div class="auth-shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-lg-10">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Left Side - Image/Illustration -->
+                        <div class="col-lg-6 auth-image-side register-side">
+                            <div class="auth-image-content">
+                                <div class="auth-logo-section">
+                                    <i class="bi bi-car-front-fill auth-logo-icon"></i>
+                                    <h2 class="auth-brand">CarRental</h2>
+                                </div>
+                                <h3 class="auth-welcome-title">Tham Gia Cùng Chúng Tôi!</h3>
+                                <p class="auth-welcome-text">Tạo tài khoản để trải nghiệm dịch vụ thuê xe chuyên nghiệp</p>
+                                <div class="auth-features">
+                                    <div class="auth-feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Đăng ký miễn phí</span>
+                                    </div>
+                                    <div class="auth-feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Ưu đãi đặc biệt</span>
+                                    </div>
+                                    <div class="auth-feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Quản lý đặt xe dễ dàng</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side - Register Form -->
+                        <div class="col-lg-6 auth-form-side">
+                            <div class="auth-form-content">
+                                <div class="auth-form-header">
+                                    <h2 class="auth-form-title">Đăng Ký</h2>
+                                    <p class="auth-form-subtitle">Điền thông tin để tạo tài khoản mới</p>
+                                </div>
+
+                                <form asp-action="Register" method="post" class="auth-form">
+                                    <div asp-validation-summary="ModelOnly" class="alert alert-danger auth-alert"></div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-person"></i>
+                                            </span>
+                                            <input asp-for="FullName"
+                                                   type="text"
+                                                   class="form-control-custom"
+                                                   placeholder="Họ và tên"
+                                                   required />
+                                            <label class="floating-label">Họ và tên</label>
+                                        </div>
+                                        <span asp-validation-for="FullName" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-envelope"></i>
+                                            </span>
+                                            <input asp-for="Email"
+                                                   type="email"
+                                                   class="form-control-custom"
+                                                   placeholder="Email"
+                                                   required />
+                                            <label class="floating-label">Email</label>
+                                        </div>
+                                        <span asp-validation-for="Email" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-telephone"></i>
+                                            </span>
+                                            <input asp-for="Phone"
+                                                   type="tel"
+                                                   class="form-control-custom"
+                                                   placeholder="Số điện thoại"
+                                                   required />
+                                            <label class="floating-label">Số điện thoại</label>
+                                        </div>
+                                        <span asp-validation-for="Phone" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-geo-alt"></i>
+                                            </span>
+                                            <input asp-for="Address"
+                                                   type="text"
+                                                   class="form-control-custom"
+                                                   placeholder="Địa chỉ"
+                                                   required />
+                                            <label class="floating-label">Địa chỉ</label>
+                                        </div>
+                                        <span asp-validation-for="Address" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-lock"></i>
+                                            </span>
+                                            <input asp-for="Password"
+                                                   type="password"
+                                                   class="form-control-custom password-input"
+                                                   placeholder="Mật khẩu"
+                                                   required />
+                                            <label class="floating-label">Mật khẩu</label>
+                                            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="Password" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-floating-group">
+                                        <div class="input-group-custom">
+                                            <span class="input-icon">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                            <input asp-for="ConfirmPassword"
+                                                   type="password"
+                                                   class="form-control-custom password-input"
+                                                   placeholder="Nhập lại mật khẩu"
+                                                   required />
+                                            <label class="floating-label">Nhập lại mật khẩu</label>
+                                            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger validation-message"></span>
+                                    </div>
+
+                                    <div class="form-check-custom mb-3">
+                                        <input type="checkbox" class="form-check-input-custom" id="agreeTerms" required>
+                                        <label class="form-check-label-custom" for="agreeTerms">
+                                            Tôi đồng ý với <a href="#" class="auth-link">Điều khoản dịch vụ</a> và <a href="#" class="auth-link">Chính sách bảo mật</a>
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="btn-auth btn-auth-primary">
+                                        <span class="btn-text">Đăng Ký</span>
+                                        <span class="btn-icon">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </span>
+                                    </button>
+
+                                    <div class="auth-divider">
+                                        <span>hoặc</span>
+                                    </div>
+
+                                    <div class="social-login">
+                                        <button type="button" class="btn-social btn-google">
+                                            <i class="bi bi-google"></i>
+                                            <span>Google</span>
+                                        </button>
+                                        <button type="button" class="btn-social btn-facebook">
+                                            <i class="bi bi-facebook"></i>
+                                            <span>Facebook</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="auth-footer">
+                                        <p>Đã có tài khoản? <a asp-action="Login" class="auth-link">Đăng nhập ngay</a></p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/auth.css" />
+    <script src="~/js/auth.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+}

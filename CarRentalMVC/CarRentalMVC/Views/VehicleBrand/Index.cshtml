@@ -1,0 +1,44 @@
+﻿@model IEnumerable<CarRentalMVC.Models.VehicleBrandViewModel>
+@{
+    ViewData["Title"] = "Quản lý Hãng Xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2 class="mb-3">🚗 Danh sách Hãng Xe</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Create">➕ Thêm mới</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Logo</th>
+            <th>Tên Hãng</th>
+            <th>Mô tả</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.BrandID</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.LogoImage))
+                    {
+                        <img src="@($"{ViewBag.ApiBase}{item.LogoImage}")" width="80" class="rounded shadow-sm" />
+                    }
+                </td>
+                <td>@item.BrandName</td>
+                <td>@item.Description</td>
+                <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.BrandID" class="btn btn-sm btn-warning">✏️ Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.BrandID" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Xóa hãng xe này?')">🗑️ Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

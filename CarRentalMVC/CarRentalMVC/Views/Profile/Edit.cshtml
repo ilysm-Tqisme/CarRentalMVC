@@ -1,0 +1,139 @@
+@model CarRentalMVC.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh Sửa Hồ Sơ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Hồ Sơ
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @* Hiển thị lỗi *@
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @* Form chỉnh sửa *@
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        @* Ảnh đại diện hiện tại *@
+                        <div class="text-center mb-4">
+                            <img src="@($"http://localhost:5000{Model.ProfileImage}")" 
+                                 alt="Ảnh đại diện" 
+                                 class="img-fluid rounded-circle mb-3" 
+                                 style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #007bff;"
+                                 id="profileImagePreview"
+                                 onerror="this.src='/images/default-avatar.png'" />
+                            <div>
+                                <label asp-for="ProfileImage" class="form-label fw-bold">Ảnh đại diện:</label>
+                                <input type="file" name="ProfileImage" class="form-control" accept="image/*" onchange="previewImage(this, 'profileImagePreview')" />
+                                <span asp-validation-for="ProfileImage" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        @* Họ và tên *@
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label fw-bold"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        @* Email (chỉ hiển thị, không cho chỉnh sửa) *@
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control" readonly />
+                            <small class="text-muted">Email không thể thay đổi</small>
+                        </div>
+
+                        @* Số điện thoại *@
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label fw-bold"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        @* Địa chỉ *@
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold"></label>
+                            <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        @* CMND/CCCD *@
+                        <div class="mb-3">
+                            <label asp-for="IDCardImage" class="form-label fw-bold">CMND/CCCD:</label>
+                            @if (!string.IsNullOrEmpty(Model.IDCardImage))
+                            {
+                                <div class="mb-2">
+                                    <img src="@($"http://localhost:5000{Model.IDCardImage}")" 
+                                         alt="CMND/CCCD" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 150px;"
+                                         onerror="this.src='/images/no-image.png'" />
+                                </div>
+                            }
+                            <input type="file" name="IDCardImage" class="form-control" accept="image/*" />
+                            <span asp-validation-for="IDCardImage" class="text-danger"></span>
+                        </div>
+
+                        @* Bằng lái xe *@
+                        <div class="mb-3">
+                            <label asp-for="DriverLicenseImage" class="form-label fw-bold">Bằng lái xe:</label>
+                            @if (!string.IsNullOrEmpty(Model.DriverLicenseImage))
+                            {
+                                <div class="mb-2">
+                                    <img src="@($"http://localhost:5000{Model.DriverLicenseImage}")" 
+                                         alt="Bằng lái xe" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 150px;"
+                                         onerror="this.src='/images/no-image.png'" />
+                                </div>
+                            }
+                            <input type="file" name="DriverLicenseImage" class="form-control" accept="image/*" />
+                            <span asp-validation-for="DriverLicenseImage" class="text-danger"></span>
+                        </div>
+
+                        @* Nút lưu và hủy *@
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Lưu Thay Đổi
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Preview ảnh đại diện khi chọn file
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
+

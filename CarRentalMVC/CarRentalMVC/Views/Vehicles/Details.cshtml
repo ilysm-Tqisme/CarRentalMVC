@@ -1,0 +1,28 @@
+﻿@model CarRentalMVC.Models.VehicleViewModel
+@{
+    ViewData["Title"] = "Chi tiết xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>@Model.VehicleName</h2>
+
+@if (!string.IsNullOrEmpty(Model.VehicleImage))
+{
+    <div class="mb-3">
+        <label>Ảnh hiện tại:</label><br />
+        <img src="@($"http://localhost:5000{Model.VehicleImage}")"
+             style="width:150px;height:100px;object-fit:cover;border-radius:8px;" />
+    </div>
+}
+
+
+
+<ul class="mt-3">
+    <li><b>Giá thuê:</b> @Model.PricePerDay.ToString("N0") đ/ngày</li>
+    <li><b>Số chỗ:</b> @Model.Seats</li>
+    <li><b>Trạng thái:</b> @Model.Status</li>
+    <li><b>Mô tả:</b> @Model.Description</li>
+</ul>
+
+<a asp-action="Edit" asp-route-id="@Model.VehicleID" class="btn btn-warning">Sửa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>

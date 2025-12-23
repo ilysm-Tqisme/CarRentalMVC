@@ -1,0 +1,245 @@
+-- =============================================
+--  HỆ THỐNG QUẢN LÝ THUÊ XE (CarRentalDB)
+--  Phiên bản hoàn chỉnh - SQL Server (SSMS)
+-- =============================================
+USE master;
+GO
+
+-- Đảm bảo không có kết nối nào đến database trước khi DROP
+ALTER DATABASE CarRentalDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+GO
+
+-- Xóa database nếu tồn tại
+DROP DATABASE IF EXISTS CarRentalDB;
+GO
+
+-- Tạo Database nếu chưa có
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CarRentalDB')
+BEGIN
+    CREATE DATABASE CarRentalDB;
+END
+GO
+
+USE CarRentalDB;
+GO
+
+-- =============================================
+-- BẢNG: Users (Người dùng)
+-- =============================================
+
+    CREATE TABLE Users (
+        UserID INT IDENTITY(1,1) PRIMARY KEY,
+        FullName NVARCHAR(100) NOT NULL,
+        Email NVARCHAR(100) UNIQUE NOT NULL,
+        Phone VARCHAR(10) CHECK (Phone LIKE '0[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+        PasswordHash NVARCHAR(255) NOT NULL, -- bcrypt hash
+        Address NVARCHAR(255),
+        ProfileImage NVARCHAR(500),
+        IDCardImage NVARCHAR(500),
+        DriverLicenseImage NVARCHAR(500),
+        Role NVARCHAR(20) DEFAULT 'User' CHECK (Role IN ('User', 'Admin')),
+        IsActive BIT DEFAULT 1,
+        IsLocked BIT DEFAULT 0, -- Admin có thể khóa/mở tài khoản
+        CreatedAt DATETIME DEFAULT GETDATE(),
+        UpdatedAt DATETIME DEFAULT GETDATE()
+    );
+
+-- =============================================
+    CREATE TABLE Branches (
+        BranchID INT IDENTITY(1,1) PRIMARY KEY,
+        BranchName NVARCHAR(100) NOT NULL,
+        BranchImage NVARCHAR(500),
+        Address NVARCHAR(255) NOT NULL,
+        Phone VARCHAR(10),
+        Description NVARCHAR(MAX),
+        TotalVehicles INT DEFAULT 0,
+        CreatedAt DATETIME DEFAULT GETDATE(),
+        UpdatedAt DATETIME DEFAULT GETDATE(),
+        IsActive BIT DEFAULT 1
+    );
+
+
+-- =============================================
+-- BẢNG: VehicleTypes (Loại xe)
+-- =============================================
+    CREATE TABLE VehicleTypes (
+        TypeID INT IDENTITY(1,1) PRIMARY KEY,
+        TypeName NVARCHAR(50) UNIQUE NOT NULL, -- Ô tô, Xe máy, ...
+        Description NVARCHAR(255),
+        CreatedAt DATETIME DEFAULT GETDATE()
+    );
+
+
+-- =============================================
+-- BẢNG: VehicleBrands (Hãng xe)
+
+    CREATE TABLE VehicleBrands (
+        BrandID INT IDENTITY(1,1) PRIMARY KEY,
+        BrandName NVARCHAR(50) UNIQUE NOT NULL, -- Toyota, Honda, ...
+        Description NVARCHAR(255),
+        LogoImage NVARCHAR(500),  -- ✅ thêm dòng này
+        CreatedAt DATETIME DEFAULT GETDATE()
+    );
+
+
+-- =============================================
+-- BẢNG: Vehicles (Xe)
+-- =============================================
+    CREATE TABLE Vehicles (
+        VehicleID INT IDENTITY(1,1) PRIMARY KEY,
+        VehicleName NVARCHAR(100) NOT NULL,
+        BrandID INT FOREIGN KEY REFERENCES VehicleBrands(BrandID),
+        TypeID INT FOREIGN KEY REFERENCES VehicleTypes(TypeID),
+        BranchID INT FOREIGN KEY REFERENCES Branches(BranchID),
+        VehicleImage NVARCHAR(500),
+        PricePerDay DECIMAL(10,2) NOT NULL,
+        Seats INT,
+        Description NVARCHAR(MAX),
+        Status NVARCHAR(20) DEFAULT 'Available' CHECK (Status IN ('Available', 'Rented', 'Maintenance', 'Reserved')),
+        IsActive BIT DEFAULT 1,
+        CreatedAt DATETIME DEFAULT GETDATE(),
+        UpdatedAt DATETIME DEFAULT GETDATE()
+    );
+
+
+
+-- =============================================
+-- BẢNG: PromotionCodes (Mã giảm giá)
+    CREATE TABLE PromotionCodes (
+        PromoID INT IDENTITY(1,1) PRIMARY KEY,
+        PromoCode NVARCHAR(50) UNIQUE NOT NULL,
+        Description NVARCHAR(255),
+        DiscountType NVARCHAR(20) CHECK (DiscountType IN ('Percentage', 'FixedAmount')),
+        DiscountValue DECIMAL(10,2) NOT NULL,
+        MinOrderAmount DECIMAL(10,2) DEFAULT 0,
+        MaxDiscountAmount DECIMAL(10,2),
+        StartDate DATETIME NOT NULL,
+        EndDate DATETIME NOT NULL,
+        UsageLimit INT DEFAULT NULL, -- NULL = unlimited
+        UsedCount INT DEFAULT 0,
+        IsActive BIT DEFAULT 1,
+        CreatedAt DATETIME DEFAULT GETDATE()
+    );
+
+
+-- =============================================
+-- BẢNG: Rentals (Đơn thuê xe)
+-- =============================================
+    CREATE TABLE Rentals (
+        RentalID INT IDENTITY(1,1) PRIMARY KEY,
+        UserID INT FOREIGN KEY REFERENCES Users(UserID),
+        VehicleID INT FOREIGN KEY REFERENCES Vehicles(VehicleID),
+        PromoID INT FOREIGN KEY REFERENCES PromotionCodes(PromoID) NULL,
+        BranchPickupID INT FOREIGN KEY REFERENCES Branches(BranchID),
+        BranchReturnID INT FOREIGN KEY REFERENCES Branches(BranchID),
+        StartDateTime DATETIME NOT NULL,
+        EndDateTime DATETIME NOT NULL,
+        TotalDays INT NOT NULL,
+        TotalHours INT NOT NULL,
+        BasePrice DECIMAL(10,2) NOT NULL,
+        DiscountAmount DECIMAL(10,2) DEFAULT 0,
+        FinalPrice DECIMAL(10,2) NOT NULL,
+        Status NVARCHAR(20) DEFAULT 'Pending' CHECK (Status IN ('Pending', 'Approved', 'Renting', 'Completed', 'Cancelled')),
+        CancellationReason NVARCHAR(500),
+        CreatedAt DATETIME DEFAULT GETDATE(),
+        UpdatedAt DATETIME DEFAULT GETDATE()
+    );
+-- =============================================
+-- BẢNG: Payments (Thanh toán)
+-- =============================================
+    CREATE TABLE Payments (
+        PaymentID INT IDENTITY(1,1) PRIMARY KEY,
+        RentalID INT FOREIGN KEY REFERENCES Rentals(RentalID),
+        PaymentMethod NVARCHAR(20) CHECK (PaymentMethod IN ('Cash', 'BankTransfer')),
+        Amount DECIMAL(10,2) NOT NULL,
+        TransactionContent NVARCHAR(255),
+        QRCodeImage NVARCHAR(500), -- ảnh QR của người nhận
+        PaymentStatus NVARCHAR(20) DEFAULT 'Pending' CHECK (PaymentStatus IN ('Pending', 'Completed', 'Failed')),
+        PaymentDate DATETIME,
+        CreatedAt DATETIME DEFAULT GETDATE()
+    );
+
+-- =============================================
+-- BẢNG: Reviews (Đánh giá)
+    CREATE TABLE Reviews (
+        ReviewID INT IDENTITY(1,1) PRIMARY KEY,
+        RentalID INT FOREIGN KEY REFERENCES Rentals(RentalID),
+        UserID INT FOREIGN KEY REFERENCES Users(UserID),
+        VehicleID INT FOREIGN KEY REFERENCES Vehicles(VehicleID),
+        Rating INT CHECK (Rating BETWEEN 1 AND 5),
+        Comment NVARCHAR(MAX),
+        CreatedAt DATETIME DEFAULT GETDATE()
+    );
+
+
+-- =============================================
+-- INDEXES
+-- =============================================
+CREATE NONCLUSTERED INDEX IX_Users_Email ON Users(Email);
+CREATE NONCLUSTERED INDEX IX_Vehicles_Status ON Vehicles(Status);
+CREATE NONCLUSTERED INDEX IX_Vehicles_BranchID ON Vehicles(BranchID);
+CREATE NONCLUSTERED INDEX IX_Rentals_UserID ON Rentals(UserID);
+CREATE NONCLUSTERED INDEX IX_Rentals_Status ON Rentals(Status);
+CREATE NONCLUSTERED INDEX IX_Rentals_StartDateTime ON Rentals(StartDateTime);
+CREATE NONCLUSTERED INDEX IX_Payments_RentalID ON Payments(RentalID);
+GO
+
+-- =============================================
+-- CÁC VIEW THỐNG KÊ / BÁO CÁO
+-- =============================================
+
+-- Doanh thu theo ngày
+CREATE OR ALTER VIEW vw_RevenueByDay
+AS
+SELECT
+    CAST(PaymentDate AS DATE) AS [Date],
+    COUNT(DISTINCT RentalID) AS TotalRentals,
+    SUM(Amount) AS TotalRevenue
+FROM Payments
+WHERE PaymentStatus = 'Completed'
+GROUP BY CAST(PaymentDate AS DATE);
+GO
+
+-- Doanh thu theo loại xe
+CREATE OR ALTER VIEW vw_RevenueByVehicleType
+AS
+SELECT
+    vt.TypeName,
+    SUM(p.Amount) AS TotalRevenue,
+    COUNT(DISTINCT r.RentalID) AS TotalRentals
+FROM Payments p
+JOIN Rentals r ON p.RentalID = r.RentalID
+JOIN Vehicles v ON r.VehicleID = v.VehicleID
+JOIN VehicleTypes vt ON v.TypeID = vt.TypeID
+WHERE p.PaymentStatus = 'Completed'
+GROUP BY vt.TypeName;
+GO
+
+-- Xe được thuê nhiều nhất
+CREATE OR ALTER VIEW vw_MostRentedVehicles
+AS
+SELECT
+    TOP 20 v.VehicleID,
+    v.VehicleName,
+    COUNT(r.RentalID) AS TimesRented
+FROM Rentals r
+JOIN Vehicles v ON r.VehicleID = v.VehicleID
+WHERE r.Status IN ('Completed', 'Renting')
+GROUP BY v.VehicleID, v.VehicleName
+ORDER BY TimesRented DESC;
+GO
+
+-- Doanh thu theo tháng
+CREATE OR ALTER VIEW vw_RevenueByMonth
+AS
+SELECT
+    YEAR(PaymentDate) AS [Year],
+    MONTH(PaymentDate) AS [Month],
+    SUM(Amount) AS TotalRevenue,
+    COUNT(DISTINCT RentalID) AS TotalRentals
+FROM Payments
+WHERE PaymentStatus = 'Completed'
+GROUP BY YEAR(PaymentDate), MONTH(PaymentDate);
+GO
+
+PRINT '✅ CarRentalDB schema has been created successfully (Full Version)';

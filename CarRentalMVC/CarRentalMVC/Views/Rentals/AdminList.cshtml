@@ -1,0 +1,186 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Quản lý đơn thuê";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@model List<CarRentalMVC.Models.RentalViewModel>
+
+
+<div class="container mt-5">
+    <h2 class="mb-4">Quản lý đơn thuê</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("AdminList")" class="btn @(string.IsNullOrEmpty(ViewBag.CurrentStatus) ? "btn-primary" : "btn-outline-primary")">
+                    Tất cả
+                </a>
+                <a href="@Url.Action("AdminList", new { status = "Pending" })" class="btn @(ViewBag.CurrentStatus == "Pending" ? "btn-primary" : "btn-outline-primary")">
+                    Chờ duyệt
+                </a>
+                <a href="@Url.Action("AdminList", new { status = "Approved" })" class="btn @(ViewBag.CurrentStatus == "Approved" ? "btn-primary" : "btn-outline-primary")">
+                    Đã duyệt
+                </a>
+                <a href="@Url.Action("AdminList", new { status = "Active" })" class="btn @(ViewBag.CurrentStatus == "Active" ? "btn-primary" : "btn-outline-primary")">
+                    Đang thuê
+                </a>
+                <a href="@Url.Action("AdminStatistics")" class="btn btn-info">
+                    📊 Thống kê
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info">Không có đơn thuê nào!</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Xe</th>
+                        <th>Ngày thuê</th>
+                        <th>Ngày trả</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rental in Model)
+                    {
+                        <tr>
+                            <td>@rental.RentalID | @rental.RentalID</td>
+
+                            <td>
+                                <strong>@rental.UserName</strong><br />
+                                <small class="text-muted">@rental.UserEmail</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@($"{ViewBag.ApiBase}{rental.VehicleImage}")" 
+                                         alt="@rental.VehicleName" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                                         onerror="this.src='/images/no-image.png'" />
+                                    <div>
+                                        <strong>@rental.VehicleName</strong><br />
+                                        <small class="text-muted">@rental.BrandName</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@rental.RentalDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@rental.ReturnDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="fw-bold">@rental.TotalPrice.ToString("N0") VNĐ</td>
+                            <td>
+                                @if (rental.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                }
+                                else if (rental.Status == "Approved")
+                                {
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                }
+                                else if (rental.Status == "Active")
+                                {
+                                    <span class="badge bg-info">Đang thuê</span>
+                                }
+                                else if (rental.Status == "Completed")
+                                {
+                                    <span class="badge bg-secondary">Hoàn thành</span>
+                                }
+                                else if (rental.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                }
+                                else if (rental.Status == "Rejected")
+                                {
+                                    <span class="badge bg-dark">Bị từ chối</span>
+                                }
+                                else if (rental.Status == "Renting")
+                                {
+                                    <span class="badge bg-primary">Đang thuê</span>
+                                }
+                            </td>
+                            <td>
+                                @* Nút duyệt đơn (chỉ hiển thị khi đơn ở trạng thái Pending) *@
+                                @if (rental.Status == "Pending")
+                                {
+                                    <form method="post" action="@Url.Action("AdminApprove", new { id = rental.RentalID })" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Duyệt đơn này?');">
+                                            <i class="bi bi-check-circle me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal@rental.RentalID">
+                                        <i class="bi bi-x-circle me-1"></i>Từ chối
+                                    </button>
+                                }
+                                @* Nút xác nhận trả xe (chỉ hiển thị khi đơn ở trạng thái Approved hoặc Renting) *@
+                                @if (rental.Status == "Approved" || rental.Status == "Renting")
+                                {
+                                    <form method="post" action="@Url.Action("AdminConfirmReturn", new { id = rental.RentalID })" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-info" 
+                                                onclick="return confirm('Xác nhận đã trả xe? Trạng thái xe sẽ được cập nhật về \"Available\".');">
+                                            <i class="bi bi-check2-all me-1"></i>Xác Nhận Trả Xe
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+
+                        <!-- Modal từ chối -->
+                        @if (rental.Status == "Pending")
+                        {
+                            <div class="modal fade" id="rejectModal@rental.RentalID" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Từ chối đơn #@rental.RentalID</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="post" action="@Url.Action("AdminReject", new { id = rental.RentalID })">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="reason" class="form-label">Lý do từ chối</label>
+                                                    <textarea class="form-control" name="reason" rows="3" placeholder="Nhập lý do..." required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-danger">Từ chối</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+

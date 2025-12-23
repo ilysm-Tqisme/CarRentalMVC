@@ -1,0 +1,132 @@
+@model CarRentalMVC.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Hồ Sơ Cá Nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>Hồ Sơ Cá Nhân
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @* Hiển thị thông báo *@
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @* Thông tin hồ sơ *@
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            @* Ảnh đại diện *@
+                            <img src="@($"http://localhost:5000{Model.ProfileImage}")" 
+                                 alt="Ảnh đại diện" 
+                                 class="img-fluid rounded-circle mb-3" 
+                                 style="width: 200px; height: 200px; object-fit: cover; border: 3px solid #007bff;"
+                                 onerror="this.src='/images/default-avatar.png'" />
+                            <h5>@Model.FullName</h5>
+                            <p class="text-muted">@Model.Email</p>
+                        </div>
+
+                        <div class="col-md-8">
+                            @* Thông tin chi tiết *@
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Họ và tên:</label>
+                                <p class="form-control-plaintext">@Model.FullName</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Email:</label>
+                                <p class="form-control-plaintext">@Model.Email</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Số điện thoại:</label>
+                                <p class="form-control-plaintext">@(Model.Phone ?? "Chưa cập nhật")</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Địa chỉ:</label>
+                                <p class="form-control-plaintext">@(Model.Address ?? "Chưa cập nhật")</p>
+                            </div>
+
+                            @* Ảnh CMND/CCCD *@
+                            @if (!string.IsNullOrEmpty(Model.IDCardImage))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">CMND/CCCD:</label>
+                                    <div>
+                                        <img src="@($"http://localhost:5000{Model.IDCardImage}")" 
+                                             alt="CMND/CCCD" 
+                                             class="img-thumbnail" 
+                                             style="max-width: 300px; max-height: 200px;"
+                                             onerror="this.src='/images/no-image.png'" />
+                                    </div>
+                                </div>
+                            }
+
+                            @* Ảnh bằng lái xe *@
+                            @if (!string.IsNullOrEmpty(Model.DriverLicenseImage))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Bằng lái xe:</label>
+                                    <div>
+                                        <img src="@($"http://localhost:5000{Model.DriverLicenseImage}")" 
+                                             alt="Bằng lái xe" 
+                                             class="img-thumbnail" 
+                                             style="max-width: 300px; max-height: 200px;"
+                                             onerror="this.src='/images/no-image.png'" />
+                                    </div>
+                                </div>
+                            }
+
+                            @* Nút chỉnh sửa *@
+                            <div class="mt-4">
+                                <a asp-action="Edit" class="btn btn-primary">
+                                    <i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Hồ Sơ
+                                </a>
+                                <a asp-controller="Rentals" asp-action="MyRentals" class="btn btn-outline-info">
+                                    <i class="bi bi-calendar-check me-2"></i>Lịch Sử Thuê Xe
+                                </a>
+                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                    <i class="bi bi-house me-2"></i>Về Trang Chủ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}
+

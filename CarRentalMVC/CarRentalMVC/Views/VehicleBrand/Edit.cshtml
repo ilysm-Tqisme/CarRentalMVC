@@ -1,0 +1,38 @@
+﻿@model CarRentalMVC.Models.VehicleBrandViewModel
+@{
+    ViewData["Title"] = "Sửa Hãng Xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>✏️ Sửa Hãng Xe</h2>
+
+<form asp-action="Edit" enctype="multipart/form-data" method="post">
+    <input type="hidden" asp-for="BrandID" />
+
+    <div class="mb-3">
+        <label class="form-label">Tên Hãng</label>
+        <input asp-for="BrandName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Logo hiện tại</label><br />
+        @if (!string.IsNullOrEmpty(Model.LogoImage))
+        {
+            <img src="@($"{ViewBag.ApiBase}{Model.LogoImage}")" width="120" class="rounded shadow-sm mb-2" />
+        }
+        <input type="file" name="logo" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">💾 Cập nhật</button>
+    <a asp-action="Index" class="btn btn-secondary">🔙 Quay lại</a>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-3">@ViewBag.Error</div>
+}

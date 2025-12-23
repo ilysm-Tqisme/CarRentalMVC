@@ -1,0 +1,64 @@
+﻿@model CarRentalMVC.Models.BranchViewModel
+@{
+    ViewBag.Title = "Sửa chi nhánh";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var apiBase = ViewBag.ApiBase as string ?? "";
+    var currentImage = $"{apiBase}{Model.BranchImage}";
+}
+
+<h2>Sửa chi nhánh</h2>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="BranchID" />
+
+    <div class="mb-3">
+        <label>Tên chi nhánh</label>
+        <input asp-for="BranchName" class="form-control" />
+        <span asp-validation-for="BranchName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Địa chỉ (Tỉnh / Thành phố)</label>
+        <select asp-for="Address" class="form-select">
+            @foreach (var province in ViewBag.Provinces)
+            {
+                <option value="@province" selected="@(province == Model.Address)">
+                    @province
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Số điện thoại</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Mô tả</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Ảnh hiện tại</label><br />
+        <img src="@currentImage" style="width:200px;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;" />
+        <br />
+        <label>Chọn ảnh mới</label>
+        <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" onchange="previewImage(event)" />
+        <img id="preview" src="#" style="display:none;margin-top:10px;width:200px;border-radius:8px;" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(event) {
+            const output = document.getElementById('preview');
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.style.display = 'block';
+        }
+    </script>
+}

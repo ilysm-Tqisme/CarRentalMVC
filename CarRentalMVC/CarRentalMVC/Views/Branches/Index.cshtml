@@ -1,0 +1,47 @@
+﻿@model IEnumerable<CarRentalMVC.Models.BranchViewModel>
+@{
+    ViewBag.Title = "Quản lý chi nhánh";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var apiBase = ViewBag.ApiBase as string ?? "";
+}
+
+<h2 class="mb-3">Danh sách chi nhánh</h2>
+<a href="@Url.Action("Create", "Branches")" class="btn btn-success mb-3">+ Thêm chi nhánh</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Ảnh</th>
+            <th>Tên chi nhánh</th>
+            <th>Địa chỉ</th>
+            <th>Số điện thoại</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var imagePath = $"{apiBase}{item.BranchImage}";
+            <tr>
+                <td>
+                    <img src="@imagePath" alt="@item.BranchName" style="width:120px;height:80px;object-fit:cover;border-radius:8px;" />
+                </td>
+                <td>@item.BranchName</td>
+                <td>@item.Address</td>
+                <td>@item.Phone</td>
+                <td>
+                    @(item.IsActive ? "Hoạt động" : "Ngừng hoạt động")
+                </td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = item.BranchID })" class="btn btn-warning btn-sm">Sửa</a>
+                    <a href="@Url.Action("Delete", new { id = item.BranchID })"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Bạn có chắc muốn Ngừng hoạt động nhánh này không?');">
+                        Ngừng hoạt động
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
